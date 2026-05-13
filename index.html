@@ -40,7 +40,7 @@ body{font-family:"Sora",sans-serif;background:var(--bg);color:var(--ink);font-si
 .spinning{animation:spin .7s linear infinite;display:inline-block;}
 
 /* TABS */
-.tabs{background:var(--card);border-bottom:1px solid var(--line);padding:0 2rem;display:flex;align-items:center;gap:2px;position:sticky;top:64px;z-index:99;overflow-x:auto;} 
+.tabs{background:var(--card);border-bottom:1px solid var(--line);padding:0 2rem;display:flex;align-items:center;gap:2px;position:sticky;top:113px;z-index:98;overflow-x:auto;} 
 .tab{padding:12px 16px;font-size:12px;font-weight:500;color:var(--ink3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-family:"Sora",sans-serif;display:flex;align-items:center;gap:6px;}
 .tab.active{color:var(--c1);border-bottom-color:var(--c2);font-weight:700;}
 
@@ -151,7 +151,7 @@ body{font-family:"Sora",sans-serif;background:var(--bg);color:var(--ink);font-si
   .tabs,.topbar{padding-left:1rem;padding-right:1rem;}
 }
 /* FILTER BAR GLOBAL */
-.filter-bar{background:var(--card);border-bottom:1px solid var(--line);padding:10px 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:112px;z-index:97;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.filter-bar{background:#FFFFFF;border-bottom:1px solid var(--line);padding:10px 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:64px;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.08);}
 .filter-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);}
 .filter-select{font-family:"Sora",sans-serif;font-size:12px;padding:5px 10px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:var(--line2);color:var(--ink);cursor:pointer;outline:none;min-width:130px;}
 .filter-select:focus{border-color:var(--c2);}
@@ -187,13 +187,6 @@ body{font-family:"Sora",sans-serif;background:var(--bg);color:var(--ink);font-si
 </header>
 
 <!-- TABS -->
-<nav class="tabs">
-  <button class="tab active" onclick="showTab('resumen',this)">📊 Resumen</button>
-  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
-  <button class="tab" onclick="showTab('seguimientos',this)">📋 Seguimientos</button>
-  <button class="tab" onclick="showTab('servicios',this)">💆 Servicios</button>
-</nav>
-
 <!-- FILTER BAR GLOBAL -->
 <div class="filter-bar">
   <span class="filter-label">Filtrar:</span>
@@ -217,6 +210,15 @@ body{font-family:"Sora",sans-serif;background:var(--bg);color:var(--ink);font-si
   <button class="btn-clear" onclick="clearGlobalFilters()">✕ Limpiar</button>
   <span class="filter-result" id="filterResult">— registros</span>
 </div>
+
+<nav class="tabs">
+  <button class="tab active" onclick="showTab('resumen',this)">📊 Resumen</button>
+  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
+  <button class="tab" onclick="showTab('seguimientos',this)">📋 Seguimientos</button>
+  <button class="tab" onclick="showTab('servicios',this)">💆 Servicios</button>
+</nav>
+
+
 
 <div class="page">
 <div class="error-box hidden" id="errorBox">
