@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carolina Salamanca — Dashboard Clientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --c1:#4A1259;--c2:#7B2D8B;--c-lt:#F5E6FA;--c-lt2:#FAF0FF;
+  --gold:#C9A227;--gold-lt:#FDF6E3;--gold-md:#E8B830;
+  --green:#166534;--green-lt:#DCFCE7;--green-md:#16A34A;
+  --red:#991B1B;--red-lt:#FEE2E2;--red-md:#DC2626;
+  --amber:#92400E;--amber-lt:#FEF3C7;--amber-md:#D97706;
+  --blue:#1A5FAD;--blue-lt:#EBF4FF;
+  --pink:#9D174D;--pink-lt:#FCE7F3;--pink-md:#DB2777;
+  --ink:#0F172A;--ink2:#1E293B;--ink3:#475569;
+  --line:#E2E8F0;--line2:#F1F5F9;--bg:#FAF5FF;--card:#FFFFFF;
+  --r:14px;--r-sm:8px;
+  --sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Sora",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#2D0040 0%,#4A1259 55%,#6B1F80 100%);height:64px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(45,0,64,.4);}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+.brand-logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--gold-md),var(--gold));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--c1);}
+.brand-name{font-size:16px;font-weight:700;color:#fff;}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.5);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:600;color:rgba(255,255,255,.8);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-time{font-size:10px;color:rgba(255,255,255,.4);}
+.btn-refresh{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:var(--r-sm);padding:6px 12px;font-family:"Sora",sans-serif;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-refresh:hover{background:rgba(255,255,255,.2);}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{animation:spin .7s linear infinite;display:inline-block;}
+
+/* TABS */
+.tabs{background:var(--card);border-bottom:1px solid var(--line);padding:0 2rem;display:flex;align-items:center;gap:2px;position:sticky;top:64px;z-index:99;overflow-x:auto;} 
+.tab{padding:12px 16px;font-size:12px;font-weight:500;color:var(--ink3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-family:"Sora",sans-serif;display:flex;align-items:center;gap:6px;}
+.tab.active{color:var(--c1);border-bottom-color:var(--c2);font-weight:700;}
+
+/* LAYOUT */
+.page{max-width:1200px;margin:0 auto;padding:1.5rem;}
+.section{display:none;}.section.active{display:block;}
+.pbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:8px;}
+.pbar-left{display:flex;align-items:center;gap:10px;}
+.ptag{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.pt-purple{background:var(--c-lt);color:var(--c2);border:1px solid rgba(123,45,139,.2);}
+.pt-green{background:var(--green-lt);color:var(--green);border:1px solid rgba(22,163,74,.2);}
+.pt-pink{background:var(--pink-lt);color:var(--pink-md);border:1px solid rgba(219,39,119,.2);}
+.pt-amber{background:var(--amber-lt);color:var(--amber);border:1px solid rgba(217,119,6,.2);}
+.ptotal{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;}
+
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.2rem;}
+.kgrid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.2rem;}
+.kgrid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.2rem;}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.25rem;box-shadow:var(--sh);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--sh-md);}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc,var(--line));border-radius:var(--r) var(--r) 0 0;}
+.ki{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:9px;}
+.kl{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.kv{font-size:26px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:3px;}
+.ks{font-size:11px;color:var(--ink3);}
+.kbadge{position:absolute;top:1rem;right:1rem;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.kb-g{background:var(--green-lt);color:var(--green);}
+.kb-r{background:var(--red-lt);color:var(--red);}
+.kb-a{background:var(--amber-lt);color:var(--amber);}
+.kb-p{background:var(--c-lt);color:var(--c2);}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.25rem;box-shadow:var(--sh);}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.card-t{font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:7px;}
+.card-ic{width:26px;height:26px;background:var(--c-lt);color:var(--c2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.card-b{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--c-lt);color:var(--c2);}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;}
+
+/* BARS */
+.blist{display:flex;flex-direction:column;gap:9px;}
+.bitem{display:flex;align-items:center;gap:8px;}
+.blabel{font-size:12px;color:var(--ink2);font-weight:500;width:160px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btrack{flex:1;height:8px;background:var(--line2);border-radius:10px;overflow:hidden;}
+.bfill{height:100%;border-radius:10px;}
+.bval{font-size:11px;font-weight:700;color:var(--ink);width:40px;text-align:right;flex-shrink:0;}
+
+/* TABLE */
+.dtable{width:100%;border-collapse:collapse;font-size:12px;}
+.dtable th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:9px 10px;text-align:left;border-bottom:2px solid var(--line);background:#FAFAFA;white-space:nowrap;}
+.dtable td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink2);}
+.dtable td.nc{font-size:12px;font-weight:600;color:var(--ink);}
+.dtable tr:last-child td{border-bottom:none;}
+.dtable tr:hover td{background:var(--line2);}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.b-g{background:var(--green-lt);color:var(--green);}
+.b-p{background:var(--c-lt);color:var(--c2);}
+.b-a{background:var(--amber-lt);color:var(--amber);}
+.b-r{background:var(--red-lt);color:var(--red);}
+.b-pink{background:var(--pink-lt);color:var(--pink-md);}
+.b-blue{background:var(--blue-lt);color:var(--blue);}
+.b-gray{background:var(--line2);color:var(--ink3);border:1px solid var(--line);}
+.b-gold{background:var(--gold-lt);color:var(--amber);}
+
+/* INSIGHT */
+.insight{border-radius:var(--r-sm);padding:11px 14px;font-size:12px;margin-top:12px;display:flex;gap:8px;align-items:flex-start;}
+.insight.info{background:linear-gradient(135deg,var(--c-lt2),#fff);border:1px solid rgba(123,45,139,.15);color:#6B21A8;}
+.insight.warn{background:linear-gradient(135deg,var(--amber-lt),#FFFBEB);border:1px solid #FDE68A;color:var(--amber);}
+.insight.ok{background:linear-gradient(135deg,var(--green-lt),#F0FDF4);border:1px solid #BBF7D0;color:var(--green);}
+.ii{font-size:15px;flex-shrink:0;}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(45,0,64,.8);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.loading-overlay.hidden{display:none;}
+.spinner-lg{width:52px;height:52px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+.loading-msg{color:#fff;font-size:14px;font-weight:600;}
+.loading-sub{color:rgba(255,255,255,.6);font-size:12px;}
+
+/* ERROR */
+.error-box{background:var(--red-lt);border:1px solid #FECACA;border-radius:var(--r);padding:1.2rem;margin:1rem 0;display:flex;gap:12px;}
+.error-box.hidden{display:none;}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;padding:2rem;gap:8px;color:var(--ink3);text-align:center;}
+
+/* CW */
+.cw{position:relative;width:100%;}
+
+/* FOOTER */
+.footer{text-align:center;padding:1.5rem;font-size:11px;color:var(--ink3);border-top:1px solid var(--line);margin-top:1.5rem;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+
+@media(max-width:900px){
+  .kgrid,.kgrid-4,.kgrid-3{grid-template-columns:repeat(2,1fr);}
+  .g2,.g3,.g21{grid-template-columns:1fr;}
+  .page{padding:1rem;}
+  .tabs,.topbar{padding-left:1rem;padding-right:1rem;}
+}
+/* FILTER BAR GLOBAL */
+.filter-bar{background:var(--card);border-bottom:1px solid var(--line);padding:10px 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:112px;z-index:97;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.filter-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);}
+.filter-select{font-family:"Sora",sans-serif;font-size:12px;padding:5px 10px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:var(--line2);color:var(--ink);cursor:pointer;outline:none;min-width:130px;}
+.filter-select:focus{border-color:var(--c2);}
+.filter-sep{width:1px;height:20px;background:var(--line);}
+.btn-clear{font-family:"Sora",sans-serif;font-size:11px;font-weight:700;background:var(--red-lt);color:var(--red-md);border:1px solid #FECACA;border-radius:var(--r-sm);padding:5px 12px;cursor:pointer;}
+.filter-result{font-size:11px;color:var(--ink3);margin-left:auto;font-weight:600;}
+
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-lg"></div>
+  <div class="loading-msg" id="loadingMsg">Cargando datos...</div>
+  <div class="loading-sub" id="loadingSub">Conectando con Google Sheets</div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="brand-logo">CS</div>
+    <div>
+      <div class="brand-name">Carolina Salamanca</div>
+      <div class="brand-sub">Dashboard Clientes — Datos en tiempo real</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div><span id="liveBadge">En vivo</span></div>
+    <button class="btn-refresh" onclick="loadData()"><span id="refreshIcon">↻</span> Actualizar</button>
+    <div class="hdr-time" id="hdrTime"></div>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab active" onclick="showTab('resumen',this)">📊 Resumen</button>
+  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
+  <button class="tab" onclick="showTab('seguimientos',this)">📋 Seguimientos</button>
+  <button class="tab" onclick="showTab('servicios',this)">💆 Servicios</button>
+</nav>
+
+<!-- FILTER BAR GLOBAL -->
+<div class="filter-bar">
+  <span class="filter-label">Filtrar:</span>
+  <select class="filter-select" id="gTipo" onchange="applyGlobalFilters()">
+    <option value="">— Tipo de cliente —</option>
+    <option value="Cliente pauta">📢 Cliente pauta</option>
+    <option value="Interesado">⭐ Interesado</option>
+    <option value="Cliente Antiguo">🔄 Cliente Antiguo</option>
+  </select>
+  <select class="filter-select" id="gEstado" onchange="applyGlobalFilters()">
+    <option value="">— Estado —</option>
+    <option value="Seguimiento">📋 Seguimiento</option>
+    <option value="Gestionado">✅ Gestionado</option>
+    <option value="Cita">📅 Cita</option>
+    <option value="No contesta">📵 No contesta</option>
+  </select>
+  <select class="filter-select" id="gServicio" onchange="applyGlobalFilters()">
+    <option value="">— Servicio —</option>
+  </select>
+  <div class="filter-sep"></div>
+  <button class="btn-clear" onclick="clearGlobalFilters()">✕ Limpiar</button>
+  <span class="filter-result" id="filterResult">— registros</span>
+</div>
+
+<div class="page">
+<div class="error-box hidden" id="errorBox">
+  <div style="font-size:20px">⚠️</div>
+  <div>
+    <div style="font-size:14px;font-weight:700;color:var(--red);">Error al cargar datos</div>
+    <div style="font-size:12px;color:var(--red-md);margin-top:4px;" id="errorMsg"></div>
+  </div>
+</div>
+
+<!-- ══════════════ RESUMEN ══════════════ -->
+<section class="section active" id="sec-resumen">
+  <div class="pbar">
+    <div class="pbar-left"><span class="ptag pt-purple">📊 Resumen general</span></div>
+    <div class="ptotal" id="totalClientes">— clientes</div>
+  </div>
+
+  <!-- KPIs principales -->
+  <div class="kgrid" id="kpiPrincipales">
+    <div class="kpi" style="--acc:var(--c2)"><div class="ki" style="background:var(--c-lt)">👥</div><div class="kl">Clientes totales</div><div class="kv" style="color:var(--c1)" id="kTotal">—</div><div class="ks">registros en el sheet</div></div>
+    <div class="kpi" style="--acc:var(--pink-md)"><div class="ki" style="background:var(--pink-lt)">📢</div><div class="kl">Clientes pauta</div><div class="kv" style="color:var(--pink-md)" id="kPauta">—</div><div class="ks" id="kPautaSub">via publicidad</div></div>
+    <div class="kpi" style="--acc:var(--amber-md)"><div class="ki" style="background:var(--amber-lt)">⭐</div><div class="kl">Interesados</div><div class="kv" style="color:var(--amber-md)" id="kInteresados">—</div><div class="ks" id="kInteresadosSub">potenciales</div></div>
+    <div class="kpi" style="--acc:var(--green-md)"><div class="ki" style="background:var(--green-lt)">🔄</div><div class="kl">Clientes antiguos</div><div class="kv" style="color:var(--green)" id="kAntiguos">—</div><div class="ks" id="kAntiguosSub">recurrentes</div></div>
+    <div class="kpi" style="--acc:var(--blue)"><div class="ki" style="background:var(--blue-lt)">📅</div><div class="kl">Con cita</div><div class="kv" style="color:var(--blue)" id="kCitas">—</div><div class="ks">citas agendadas</div></div>
+  </div>
+
+  <!-- KPIs de seguimiento -->
+  <div class="kgrid-4" id="kpiSeguimientos">
+    <div class="kpi" style="--acc:var(--c2)"><div class="ki" style="background:var(--c-lt)">📋</div><div class="kl">En seguimiento</div><div class="kv" style="color:var(--c1)" id="kSeguimiento">—</div><div class="ks" id="kSeguimientoSub">estado actual</div></div>
+    <div class="kpi" style="--acc:var(--green-md)"><div class="ki" style="background:var(--green-lt)">✅</div><div class="kl">Gestionados</div><div class="kv" style="color:var(--green)" id="kGestionados">—</div><div class="ks">completados</div></div>
+    <div class="kpi" style="--acc:var(--red-md)"><div class="ki" style="background:var(--red-lt)">📵</div><div class="kl">No contesta</div><div class="kv" style="color:var(--red-md)" id="kNoContesta">—</div><div class="ks">sin respuesta</div></div>
+    <div class="kpi" style="--acc:var(--gold-md)"><div class="ki" style="background:var(--gold-lt)">💆</div><div class="kl">Servicio top</div><div class="kv" style="color:var(--amber-md);font-size:14px" id="kServicioTop">—</div><div class="ks" id="kServicioTopSub">más solicitado</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">👥</div>Distribución por tipo de cliente</div></div>
+      <div class="cw" style="height:200px"><canvas id="chartTipos"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">📋</div>Distribución por estado</div></div>
+      <div class="cw" style="height:200px"><canvas id="chartEstados"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">💆</div>Servicios más solicitados</div><span class="card-b" id="serviciosBadge">—</span></div>
+      <div class="blist" id="barServicios"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">📈</div>Clientes por mes</div></div>
+      <div class="cw" style="height:200px"><canvas id="chartMeses"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight info" id="insightBox">
+    <span class="ii">💡</span><span id="insightTxt">Cargando análisis...</span>
+  </div>
+</section>
+
+<!-- ══════════════ CLIENTES ══════════════ -->
+<section class="section" id="sec-clientes">
+  <div class="pbar">
+    <div class="pbar-left">
+      <span class="ptag pt-purple">👥 Vista de clientes</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+
+      <div class="ptotal" id="clientesTotal">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="overflow-x:auto;max-height:560px;overflow-y:auto;">
+      <table class="dtable">
+        <thead>
+          <tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Servicio</th><th>Tipo</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="tbClientes"></tbody>
+      </table>
+    </div>
+    <p id="clientesCount" style="font-size:11px;color:var(--ink3);margin-top:10px;"></p>
+  </div>
+</section>
+
+<!-- ══════════════ SEGUIMIENTOS ══════════════ -->
+<section class="section" id="sec-seguimientos">
+  <div class="pbar">
+    <div class="pbar-left"><span class="ptag pt-amber">📋 Seguimientos</span></div>
+    <div class="ptotal" id="seguimientosTotal">—</div>
+  </div>
+
+  <div class="kgrid-3" id="kpiSeg2">
+    <div class="kpi" style="--acc:var(--c2)"><div class="ki" style="background:var(--c-lt)">📋</div><div class="kl">Total seguimientos</div><div class="kv" style="color:var(--c1)" id="kSeg1">—</div><div class="ks">en proceso</div></div>
+    <div class="kpi" style="--acc:var(--blue)"><div class="ki" style="background:var(--blue-lt)">📅</div><div class="kl">Citas agendadas</div><div class="kv" style="color:var(--blue)" id="kSeg2">—</div><div class="ks">confirmadas</div></div>
+    <div class="kpi" style="--acc:var(--red-md)"><div class="ki" style="background:var(--red-lt)">📵</div><div class="kl">No contesta</div><div class="kv" style="color:var(--red-md)" id="kSeg3">—</div><div class="ks">pendientes de contacto</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">📋</div>Seguimientos activos por tipo</div></div>
+      <div class="cw" style="height:220px"><canvas id="chartSegTipo"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">📅</div>Citas agendadas</div><span class="card-b" id="citasBadge">—</span></div>
+      <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+        <table class="dtable">
+          <thead><tr><th>Cliente</th><th>Teléfono</th><th>Servicio</th><th>Tipo</th><th>Fecha</th></tr></thead>
+          <tbody id="tbCitas"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-h"><div class="card-t"><div class="card-ic">📵</div>Clientes sin respuesta — acción requerida</div><span class="card-b" id="noContestaB">—</span></div>
+    <div style="overflow-x:auto;">
+      <table class="dtable">
+        <thead><tr><th>Cliente</th><th>Teléfono</th><th>Servicio</th><th>Tipo</th><th>Fecha</th></tr></thead>
+        <tbody id="tbNoContesta"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SERVICIOS ══════════════ -->
+<section class="section" id="sec-servicios">
+  <div class="pbar">
+    <div class="pbar-left"><span class="ptag pt-pink">💆 Servicios</span></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">💆</div>Servicios solicitados</div></div>
+      <div class="cw" style="height:280px"><canvas id="chartServiciosBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="card-t"><div class="card-ic">🍩</div>Distribución porcentual</div></div>
+      <div class="cw" style="height:280px"><canvas id="chartServiciosDoughnut"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-h"><div class="card-t"><div class="card-ic">📋</div>Detalle por servicio</div></div>
+    <div class="table-wrap" style="overflow-x:auto;">
+      <table class="dtable">
+        <thead><tr><th>Servicio</th><th>Total</th><th>Seguimiento</th><th>Cita</th><th>Gestionado</th><th>No contesta</th><th>% del total</th></tr></thead>
+        <tbody id="tbServicios"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<div class="footer">Carolina Salamanca · Dashboard Clientes · Google Sheets en tiempo real · <span id="footerTime"></span></div>
+
+<script>
+var PROXY = 'https://script.google.com/macros/s/AKfycbyTjyBhllLOo_9UkwxLP14B1YjSIxRYHFkFnNaM6DBEnoEv6DoXk0E_gero079-jv6_/exec';
+var RAW = [];
+var FILTERED = [];
+var CHARTS = {};
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+function fDate(v){
+  if(!v)return'—';
+  // Excel serial date → JS date
+  if(typeof v==='number'){
+    var d=new Date(Math.round((v-25569)*86400000));
+    return d.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  }
+  return String(v).substring(0,10);
+}
+function fTel(v){
+  if(!v)return'—';
+  var n=String(v).replace(/\.0$/,'').replace(/E9$/,'').replace(/[^0-9]/g,'');
+  if(n.length>10)n=n.substring(0,10);
+  return n||'—';
+}
+function normTipo(t){return String(t||'').trim().replace(/^\s+/,'');}
+function setTime(){
+  var s=new Date().toLocaleString('es-CO',{hour12:false});
+  ['hdrTime','footerTime'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=s;});
+}
+function mkChart(id,cfg){
+  var el=document.getElementById(id);if(!el)return;
+  if(CHARTS[id])CHARTS[id].destroy();
+  CHARTS[id]=new Chart(el,cfg);
+}
+function showTab(n,el){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('sec-'+n).classList.add('active');
+  el.classList.add('active');
+}
+function showLoad(msg,sub){
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingMsg').textContent=msg||'Cargando...';
+  document.getElementById('loadingSub').textContent=sub||'';
+}
+function hideLoad(){document.getElementById('loadingOverlay').classList.add('hidden');}
+function showErr(msg){document.getElementById('errorBox').classList.remove('hidden');document.getElementById('errorMsg').textContent=msg;}
+
+var TF={family:'Sora',size:11},TC='#64748B',GC='rgba(0,0,0,.04)';
+var PAL=['#7B2D8B','#DB2777','#D97706','#16A34A','#1A5FAD','#DC2626','#0E7490','#92400E'];
+
+// ════════════════════════════════════════
+// CARGA
+// ════════════════════════════════════════
+function loadData(){
+  var icon=document.getElementById('refreshIcon');
+  icon.classList.add('spinning');
+  document.getElementById('errorBox').classList.add('hidden');
+  showLoad('Cargando clientes...','Conectando con Google Sheets');
+
+  fetch(PROXY)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.error){hideLoad();icon.classList.remove('spinning');showErr(d.error);return;}
+      parseData(d);
+      renderAll();
+      hideLoad();
+      icon.classList.remove('spinning');
+      document.getElementById('liveBadge').textContent='Actualizado '+new Date().toLocaleTimeString('es-CO');
+    })
+    .catch(function(e){
+      hideLoad();icon.classList.remove('spinning');
+      showErr('No se pudo conectar: '+e.message);
+    });
+}
+
+// ════════════════════════════════════════
+// PARSE
+// ════════════════════════════════════════
+function parseData(json){
+  var raw=json['Hoja 1']||json.Sheet1||json['hoja1']||Object.values(json)[0]||[];
+  RAW=[];
+  for(var i=1;i<raw.length;i++){
+    var r=raw[i];
+    if(!Array.isArray(r)||r.length<5)continue;
+    if(!r[1]&&!r[2])continue; // fila vacía
+    RAW.push({
+      fecha:    r[0]||'',
+      cliente:  String(r[1]||'').trim()||'Sin nombre',
+      telefono: r[2]||'',
+      servicio: String(r[3]||'').trim(),
+      tipo:     normTipo(r[4]),
+      estado:   String(r[5]||'').trim(),
+    });
+  }
+  // Siempre sincronizar FILTERED con RAW al cargar
+  FILTERED = RAW.slice();
+  poblarServicioSelect();
+  document.getElementById('filterResult').textContent = FILTERED.length + ' registros';
+}
+
+// ════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════
+function poblarServicioSelect(){
+  var svcSet={};
+  RAW.forEach(function(r){if(r.servicio)svcSet[r.servicio]=1;});
+  var sel=document.getElementById('gServicio');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">— Servicio —</option>';
+  Object.keys(svcSet).sort().forEach(function(s){
+    var o=document.createElement('option');
+    o.value=s;o.textContent=s;sel.appendChild(o);
+  });
+  if(cur)sel.value=cur;
+}
+
+function applyGlobalFilters(){
+  var fT=document.getElementById('gTipo').value;
+  var fE=document.getElementById('gEstado').value;
+  var fS=document.getElementById('gServicio').value;
+  FILTERED=RAW.filter(function(r){
+    if(fT&&r.tipo!==fT)return false;
+    if(fE&&r.estado!==fE)return false;
+    if(fS&&r.servicio!==fS)return false;
+    return true;
+  });
+  document.getElementById('filterResult').textContent=FILTERED.length+' registros';
+  renderAll();
+}
+
+function clearGlobalFilters(){
+  document.getElementById('gTipo').value='';
+  document.getElementById('gEstado').value='';
+  document.getElementById('gServicio').value='';
+  FILTERED=RAW.slice();
+  document.getElementById('filterResult').textContent=FILTERED.length+' registros';
+  renderAll();
+}
+
+function renderAll(){
+  renderResumen();
+  renderClientes();
+  renderSeguimientos();
+  renderServicios();
+  document.getElementById('totalClientes').textContent=FILTERED.length+' clientes';
+}
+
+// ════════════════════════════════════════
+// RESUMEN
+// ════════════════════════════════════════
+function renderResumen(){
+  var data=FILTERED;
+  var total=data.length;
+
+  // Por tipo
+  var pauta=data.filter(function(r){return r.tipo==='Cliente pauta';}).length;
+  var interesados=data.filter(function(r){return r.tipo==='Interesado';}).length;
+  var antiguos=data.filter(function(r){return r.tipo==='Cliente Antiguo';}).length;
+
+  // Por estado
+  var seguimiento=data.filter(function(r){return r.estado==='Seguimiento';}).length;
+  var gestionados=data.filter(function(r){return r.estado==='Gestionado';}).length;
+  var citas=data.filter(function(r){return r.estado==='Cita';}).length;
+  var noContesta=data.filter(function(r){return r.estado==='No contesta';}).length;
+
+  // Servicio top
+  var svcMap={};
+  data.forEach(function(r){if(r.servicio)svcMap[r.servicio]=(svcMap[r.servicio]||0)+1;});
+  var svcTop=Object.entries(svcMap).sort(function(a,b){return b[1]-a[1];})[0];
+
+  // KPIs principales
+  document.getElementById('kTotal').textContent=total;
+  document.getElementById('kPauta').textContent=pauta;
+  document.getElementById('kPautaSub').textContent=Math.round(pauta/total*100)+'% del total';
+  document.getElementById('kInteresados').textContent=interesados;
+  document.getElementById('kInteresadosSub').textContent=Math.round(interesados/total*100)+'% del total';
+  document.getElementById('kAntiguos').textContent=antiguos;
+  document.getElementById('kAntiguosSub').textContent=Math.round(antiguos/total*100)+'% del total';
+  document.getElementById('kCitas').textContent=citas;
+
+  // KPIs seguimiento
+  document.getElementById('kSeguimiento').textContent=seguimiento;
+  document.getElementById('kSeguimientoSub').textContent=Math.round(seguimiento/total*100)+'% en proceso';
+  document.getElementById('kGestionados').textContent=gestionados;
+  document.getElementById('kNoContesta').textContent=noContesta;
+  document.getElementById('kServicioTop').textContent=svcTop?svcTop[0].substring(0,18)+'..':'—';
+  document.getElementById('kServicioTopSub').textContent=svcTop?svcTop[1]+' solicitudes':'';
+
+  // Chart tipos
+  mkChart('chartTipos',{type:'doughnut',data:{
+    labels:['Cliente pauta','Interesado','Cliente Antiguo'],
+    datasets:[{data:[pauta,interesados,antiguos],backgroundColor:['#DB2777','#D97706','#16A34A'],borderWidth:2,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:TF,color:TC,boxWidth:10}}}}});
+
+  // Chart estados
+  mkChart('chartEstados',{type:'doughnut',data:{
+    labels:['Seguimiento','Gestionado','Cita','No contesta'],
+    datasets:[{data:[seguimiento,gestionados,citas,noContesta],backgroundColor:['#7B2D8B','#16A34A','#1A5FAD','#DC2626'],borderWidth:2,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:TF,color:TC,boxWidth:10}}}}});
+
+  // Bar servicios
+  var svcArr=Object.entries(svcMap).sort(function(a,b){return b[1]-a[1];});
+  document.getElementById('serviciosBadge').textContent=svcArr.length+' servicios';
+  var maxS=svcArr[0]?svcArr[0][1]:1;
+  document.getElementById('barServicios').innerHTML=svcArr.map(function(e,i){
+    var nm=e[0].length>25?e[0].substring(0,25)+'…':e[0];
+    return'<div class="bitem">'+
+      '<span class="blabel" title="'+e[0]+'">'+nm+'</span>'+
+      '<div class="btrack"><div class="bfill" style="width:'+Math.round(e[1]/maxS*100)+'%;background:'+PAL[i%PAL.length]+'"></div></div>'+
+      '<span class="bval">'+e[1]+'</span>'+
+    '</div>';
+  }).join('');
+
+  // Chart meses
+  var mMap={};
+  data.forEach(function(r){
+    var d=r.fecha;
+    var key='—';
+    if(typeof d==='number'&&d>40000){
+      var dt=new Date(Math.round((d-25569)*86400000));
+      key=dt.toLocaleDateString('es-CO',{month:'short',year:'2-digit'});
+    } else if(typeof d==='string'&&d.length>=7){
+      key=d.substring(0,7);
+    }
+    mMap[key]=(mMap[key]||0)+1;
+  });
+  var mArr=Object.entries(mMap).filter(function(e){return e[0]!=='—';});
+  mkChart('chartMeses',{type:'bar',data:{
+    labels:mArr.map(function(e){return e[0];}),
+    datasets:[{data:mArr.map(function(e){return e[1];}),backgroundColor:'rgba(123,45,139,.75)',borderRadius:5,borderSkipped:false}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TC,font:TF},grid:{display:false}},y:{ticks:{color:TC,font:TF},grid:{color:GC}}}}});
+
+  // Insight
+  var pctCita=Math.round(citas/total*100);
+  var pctGest=Math.round(gestionados/total*100);
+  var ins='Total de '+total+' registros. '+pauta+' clientes vía pauta ('+Math.round(pauta/total*100)+'%), '+interesados+' interesados y '+antiguos+' clientes recurrentes. '+citas+' citas agendadas y '+gestionados+' gestionados. Servicio más solicitado: '+(svcTop?svcTop[0]+' con '+svcTop[1]+' solicitudes.':'—');
+  document.getElementById('insightTxt').textContent=ins;
+  var el=document.getElementById('insightBox');
+  el.className='insight '+(pctCita+pctGest>15?'ok':'info');
+}
+
+// ════════════════════════════════════════
+// CLIENTES
+// ════════════════════════════════════════
+function tipoBadge(t){
+  var m={'Cliente pauta':'<span class="badge b-pink">📢 Pauta</span>','Interesado':'<span class="badge b-gold">⭐ Interesado</span>','Cliente Antiguo':'<span class="badge b-g">🔄 Antiguo</span>'};
+  return m[t]||'<span class="badge b-gray">'+t+'</span>';
+}
+function estadoBadge(e){
+  var m={'Seguimiento':'<span class="badge b-p">📋 Seguimiento</span>','Gestionado':'<span class="badge b-g">✅ Gestionado</span>','Cita':'<span class="badge b-blue">📅 Cita</span>','No contesta':'<span class="badge b-r">📵 No contesta</span>'};
+  return m[e]||'<span class="badge b-gray">'+e+'</span>';
+}
+
+function renderClientes(){
+  var rows=FILTERED.slice();
+  document.getElementById('clientesTotal').textContent=rows.length+' clientes';
+  document.getElementById('clientesCount').textContent='Mostrando '+rows.length+' de '+FILTERED.length+' registros';
+  document.getElementById('tbClientes').innerHTML=rows.map(function(r,i){
+    return'<tr>'+
+      '<td style="color:var(--ink3);font-size:11px">'+(i+1)+'</td>'+
+      '<td style="font-size:11px;color:var(--ink3)">'+fDate(r.fecha)+'</td>'+
+      '<td class="nc">'+r.cliente+'</td>'+
+      '<td style="font-family:monospace;font-size:11px">'+fTel(r.telefono)+'</td>'+
+      '<td style="font-size:11px;color:var(--ink3);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+r.servicio+'">'+r.servicio+'</td>'+
+      '<td>'+tipoBadge(r.tipo)+'</td>'+
+      '<td>'+estadoBadge(r.estado)+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// SEGUIMIENTOS
+// ════════════════════════════════════════
+function renderSeguimientos(){
+  var seg=FILTERED.filter(function(r){return r.estado==='Seguimiento';});
+  var citas=RAW.filter(function(r){return r.estado==='Cita';});
+  var noC=RAW.filter(function(r){return r.estado==='No contesta';});
+  var gest=RAW.filter(function(r){return r.estado==='Gestionado';});
+
+  document.getElementById('kSeg1').textContent=seg.length;
+  document.getElementById('kSeg2').textContent=citas.length;
+  document.getElementById('kSeg3').textContent=noC.length;
+  document.getElementById('seguimientosTotal').textContent=seg.length+' en seguimiento';
+  document.getElementById('citasBadge').textContent=citas.length+' citas';
+  document.getElementById('noContestaB').textContent=noC.length+' clientes';
+
+  // Chart seguimientos por tipo de cliente
+  var tipos=['Cliente pauta','Interesado','Cliente Antiguo'];
+  var colores=['#DB2777','#D97706','#16A34A'];
+  var segPorTipo=tipos.map(function(t){return seg.filter(function(r){return r.tipo===t;}).length;});
+  mkChart('chartSegTipo',{type:'bar',data:{
+    labels:tipos,
+    datasets:[{data:segPorTipo,backgroundColor:colores,borderRadius:5,borderSkipped:false}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:TC,font:TF},grid:{display:false}},y:{ticks:{color:TC,font:TF},grid:{color:GC}}}}});
+
+  // Tabla citas
+  document.getElementById('tbCitas').innerHTML=citas.length?citas.map(function(r){
+    return'<tr>'+
+      '<td class="nc">'+r.cliente+'</td>'+
+      '<td style="font-family:monospace;font-size:11px">'+fTel(r.telefono)+'</td>'+
+      '<td style="font-size:11px">'+r.servicio+'</td>'+
+      '<td>'+tipoBadge(r.tipo)+'</td>'+
+      '<td style="font-size:11px;color:var(--ink3)">'+fDate(r.fecha)+'</td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="5"><div class="empty"><div>📅</div><div>Sin citas registradas</div></div></td></tr>';
+
+  // Tabla no contesta
+  document.getElementById('tbNoContesta').innerHTML=noC.length?noC.map(function(r){
+    return'<tr>'+
+      '<td class="nc">'+r.cliente+'</td>'+
+      '<td style="font-family:monospace;font-size:11px;color:var(--red-md)">'+fTel(r.telefono)+'</td>'+
+      '<td style="font-size:11px">'+r.servicio+'</td>'+
+      '<td>'+tipoBadge(r.tipo)+'</td>'+
+      '<td style="font-size:11px;color:var(--ink3)">'+fDate(r.fecha)+'</td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="5"><div class="empty"><div>✅</div><div>Sin clientes sin respuesta</div></div></td></tr>';
+}
+
+// ════════════════════════════════════════
+// SERVICIOS
+// ════════════════════════════════════════
+function renderServicios(){
+  var svcMap={};
+  FILTERED.forEach(function(r){
+    var s=r.servicio||'Sin especificar';
+    if(!svcMap[s])svcMap[s]={total:0,seguimiento:0,cita:0,gestionado:0,noContesta:0};
+    svcMap[s].total++;
+    if(r.estado==='Seguimiento')svcMap[s].seguimiento++;
+    else if(r.estado==='Cita')svcMap[s].cita++;
+    else if(r.estado==='Gestionado')svcMap[s].gestionado++;
+    else if(r.estado==='No contesta')svcMap[s].noContesta++;
+  });
+
+  var svcArr=Object.entries(svcMap).sort(function(a,b){return b[1].total-a[1].total;});
+  var labels=svcArr.map(function(e){return e[0].length>20?e[0].substring(0,20)+'…':e[0];});
+  var vals=svcArr.map(function(e){return e[1].total;});
+
+  mkChart('chartServiciosBar',{type:'bar',data:{
+    labels:labels,
+    datasets:[{data:vals,backgroundColor:PAL,borderRadius:5,borderSkipped:false}]
+  },options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:TC,font:TF},grid:{color:GC}},y:{ticks:{color:TC,font:TF},grid:{display:false}}}}});
+
+  mkChart('chartServiciosDoughnut',{type:'doughnut',data:{
+    labels:labels,
+    datasets:[{data:vals,backgroundColor:PAL,borderWidth:2,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:TF,color:TC,boxWidth:10}}}}});
+
+  document.getElementById('tbServicios').innerHTML=svcArr.map(function(e){
+    var d=e[1],pct=Math.round(d.total/RAW.length*100);
+    return'<tr>'+
+      '<td class="nc" style="max-width:220px">'+e[0]+'</td>'+
+      '<td style="font-weight:700;color:var(--c1)">'+d.total+'</td>'+
+      '<td><span class="badge b-p">'+d.seguimiento+'</span></td>'+
+      '<td><span class="badge b-blue">'+d.cita+'</span></td>'+
+      '<td><span class="badge b-g">'+d.gestionado+'</span></td>'+
+      '<td><span class="badge b-r">'+d.noContesta+'</span></td>'+
+      '<td style="font-weight:700;color:var(--c2)">'+pct+'%</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+setTime();setInterval(setTime,60000);
+window.addEventListener('DOMContentLoaded',loadData);
+</script>
+</body>
+</html>
